@@ -1,0 +1,44 @@
+name: Validate bootstrap feeds
+
+on:
+  push:
+    paths:
+      - 'channels/**'
+      - 'schemas/**'
+      - '.github/workflows/validate-feeds.yml'
+  pull_request:
+    paths:
+      - 'channels/**'
+      - 'schemas/**'
+      - '.github/workflows/validate-feeds.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate empty bootstrap channels
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          schema = json.loads(Path("schemas/bootstrap-channel-v1.schema.json").read_text())
+          assert schema["properties"]["release"] == {"type": "null"}
+          expected = {"stable", "beta", "nightly"}
+          actual = {p.stem for p in Path("channels").glob("*.json")}
+          assert actual == expected, f"Unexpected channel set: {actual}"
+          for channel in sorted(expected):
+              path = Path("channels") / f"{channel}.json"
+              obj = json.loads(path.read_text())
+              assert set(obj) == {"schemaVersion", "channel", "release"}, path
+              assert type(obj["schemaVersion"]) is int and obj["schemaVersion"] == 1, path
+              assert obj["channel"] == channel, path
+              assert obj["release"] is None, path
+              print(f"PASS {path}: no release advertised")
+          PY
