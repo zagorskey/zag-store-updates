@@ -26,3 +26,7 @@ Release tags should distinguish channels, e.g. `v1.0.0-beta.1`. The actual Info.
 ## Automation
 
 Publishing must be manual and gated initially. Do not enable the inherited Feather release workflows until replaced and validated.
+
+## Sensitive embedded material gate
+
+Prior to accepting any IPA, inspect all packaged resources for embedded private keys and credentials. The development Makefile currently copies `deps/*` into the app after applying an ad-hoc signature. A PEM extension is not proof of private-key content; inspect file types without printing secrets. If private keys are embedded, stop release publication, remove them from the distribution build, and rotate exposed credentials if warranted. Changes to bundle contents after signing require re-signing and re-verification. Never publish a CI build as installable merely because `codesign --sign -` succeeded.
