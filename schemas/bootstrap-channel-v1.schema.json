@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zagstore.app/schemas/bootstrap-channel-v1.schema.json",
+  "title": "Zag Store empty channel bootstrap",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "channel",
+    "release"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "channel": {
+      "enum": [
+        "stable",
+        "beta",
+        "nightly"
+      ]
+    },
+    "release": {
+      "type": "null"
+    }
+  }
+}
